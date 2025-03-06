@@ -1,21 +1,39 @@
 package em.eua.distrcomp.lesson3.ex1;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 public class Walker implements Runnable {
     private String name;
     private int[] coords;
+    private int sleepTime;
+    private static ReentrantLock lock = new ReentrantLock();
 
-    public Walker(String name, int[] startingCoords) {
+    public Walker(String name, int[] startingCoords, int sleepTime) {
         this.name = name;
         this.coords = startingCoords;
+        this.sleepTime = sleepTime;
     }
 
     @Override
     public void run() {
         while (true) {
-            System.out.println(getMessage(name, coords));
             coords = calculateStep(coords);
+
+            if (Walker.lock.isLocked()) {
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            System.out.println(getMessage(name, coords));
+
+            if (coords[0] == 2 && coords[1] == 2) {
+                lock.tryLock();
+            }
+
             try {
-                Thread.sleep(100l);
+                Thread.sleep(this.sleepTime);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
