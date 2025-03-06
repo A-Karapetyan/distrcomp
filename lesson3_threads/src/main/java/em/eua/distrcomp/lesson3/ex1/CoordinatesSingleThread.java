@@ -1,15 +1,27 @@
 package em.eua.distrcomp.lesson3.ex1;
 
 public class CoordinatesSingleThread {
+    static boolean isLocked = false;
     public static void main(String[] args) {
-        int[] person1Coord = new int[]{0, 0};
-        int[] person2Coord = new int[]{0, 0};
+        int[] personCoord = new int[]{0, 0};
 
-        while (true) {
-            System.out.println(getMessage("person1", person1Coord));
-            System.out.println(getMessage("person2", person2Coord));
-            person1Coord = calculateStep(person1Coord);
-            person2Coord = calculateStep(person2Coord);
+        while (!CoordinatesSingleThread.isLocked) {
+
+            for (int i = 0; i < 10; i++) {
+                System.out.println(getMessage("person1", personCoord));
+                personCoord = calculateStep(personCoord);
+
+                CoordinatesSingleThread.isLocked = personCoord[0] == -2 && personCoord[1] == -2;
+
+                if (CoordinatesSingleThread.isLocked) {
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+
+            }
 
             try {
                 Thread.sleep(200l);
